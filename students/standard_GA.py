@@ -130,7 +130,17 @@ class GeneticAlgorithm:
 
 # Example usage
 if __name__ == "__main__":
-    ga = GeneticAlgorithm(num_generations=1, scenario='Walker-v0', controller=hopping_motion, directory="results/genetic_algorithm/Walker-v0/hopping/")
+
+    ga = GeneticAlgorithm(num_generations=50, 
+                          population_size=10,
+                          tournament_size=5, 
+                          mutation_rate=0.1, 
+                          crossover_rate=0.7,
+                          elitism_count=2,
+                          scenario='Walker-v0',
+                          controller=hopping_motion,
+                          directory="results/genetic_algorithm/Walker-v0/hopping/")
+                         
     ga.execute_runs(n_runs=2)
 
     #ga = GeneticAlgorithm(num_generations=10, scenario='BridgeWalker-v0', controller=hopping_motion, directory="results/genetic_algorithm/BridgeWalker-v0/")
