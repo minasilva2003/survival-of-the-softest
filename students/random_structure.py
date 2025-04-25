@@ -178,8 +178,8 @@ class RandomStructureSearch:
 
 # Example usage
 if __name__ == "__main__":
-    search = RandomStructureSearch(num_generations=10, scenario='Walker-v0', controller=hopping_motion, directory="results/random_search/Walker-v0/")
-    search.execute_runs(n_runs=2)
+    search = RandomStructureSearch(num_generations=100, scenario='Walker-v0', controller=hopping_motion, directory="results/random_search/Walker-v0/")
+    search.execute_runs(n_runs=5)
 
-    search = RandomStructureSearch(num_generations=10, scenario='BridgeWalker-v0', controller=hopping_motion, directory="results/random_search/BridgeWalker-v0/")
-    search.execute_runs(n_runs=2)
+    #search = RandomStructureSearch(num_generations=100, scenario='BridgeWalker-v0', controller=hopping_motion, directory="results/random_search/BridgeWalker-v0/")
+    #search.execute_runs(n_runs=5)
