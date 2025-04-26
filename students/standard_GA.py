@@ -132,16 +132,39 @@ class GeneticAlgorithm:
 if __name__ == "__main__":
 
     ga = GeneticAlgorithm(num_generations=50, 
-                          population_size=10,
+                          population_size=25,
                           tournament_size=5, 
-                          mutation_rate=0.1, 
-                          crossover_rate=0.7,
+                          mutation_rate=0.5, 
+                          crossover_rate=0.8,
                           elitism_count=2,
-                          scenario='Walker-v0',
+                          scenario='BridgeWalker-v0',
                           controller=hopping_motion,
-                          directory="results/genetic_algorithm/Walker-v0/hopping/")
+                          directory="results/genetic_algorithm/BridgeWalker-v0/hopping/")
                          
-    ga.execute_runs(n_runs=2)
+    ga.execute_runs(n_runs=3)
 
+    ga = GeneticAlgorithm(num_generations=50, 
+                          population_size=25,
+                          tournament_size=5, 
+                          mutation_rate=0.5, 
+                          crossover_rate=0.8,
+                          elitism_count=2,
+                          scenario='BridgeWalker-v0',
+                          controller=alternating_gait,
+                          directory="results/genetic_algorithm/BridgeWalker-v0/walking/")
+                         
+    ga.execute_runs(n_runs=3)
+
+    ga = GeneticAlgorithm(num_generations=50, 
+                          population_size=25,
+                          tournament_size=5, 
+                          mutation_rate=0.5, 
+                          crossover_rate=0.8,
+                          elitism_count=2,
+                          scenario='BridgeWalker-v0',
+                          controller=sinusoidal_wave,
+                          directory="results/genetic_algorithm/BridgeWalker-v0/slithering/")
+                         
+    ga.execute_runs(n_runs=3)
     #ga = GeneticAlgorithm(num_generations=10, scenario='BridgeWalker-v0', controller=hopping_motion, directory="results/genetic_algorithm/BridgeWalker-v0/")
     #ga.execute_runs(n_runs=2)
