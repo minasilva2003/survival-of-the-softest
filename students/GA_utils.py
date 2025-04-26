@@ -82,3 +82,24 @@ def simulate_and_save(best_robot, filename, scenario, steps, controller):
     utils.simulate_best_robot(best_robot, scenario=scenario, steps=steps)
     utils.create_gif(best_robot, filename=filename, scenario=scenario, steps=steps, controller=controller)
 
+
+
+#function to remove worst individuals and add new individuals
+def immigrant_function(population, fitnesses, immigrant_pool_size, scenario, controller, grid_size):
+  
+    # Rank the population by fitness (lowest to highest)
+    ranked_population = sorted(zip(population, fitnesses), key=lambda x: x[1])
+
+    # Remove the lowest-ranking individuals
+    survivors = [individual[0] for individual in ranked_population[immigrant_pool_size:]]
+    survivor_fitnesses = [individual[1] for individual in ranked_population[immigrant_pool_size:]]
+
+    # Create new robots to replace the removed individuals
+    immigrants = [create_random_robot(grid_size) for _ in range(immigrant_pool_size)]
+    immigrant_fitnesses = [evaluate_fitness(scenario, controller, robot) for robot in immigrants]
+
+    # Combine the survivors and the new immigrants
+    updated_population = survivors + immigrants
+    updated_fitnesses = survivor_fitnesses + immigrant_fitnesses
+
+    return updated_population, updated_fitnesses

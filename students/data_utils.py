@@ -2,6 +2,7 @@ import os
 import csv
 import matplotlib.pyplot as plt
 import numpy as np
+import json
 
 # Function to create a directory if it doesn't exist
 def create_directory(directory):
@@ -61,3 +62,13 @@ def average_csv_files(directory, prefix, output_file):
             writer.writerow([i, value])
 
     plot_graph(averaged_data, len(averaged_data), 'Generation', 'Average Best Fitness', 'Average Best Fitness', f'Average Best Fitness Per Generation', os.path.join(directory, 'average_plot.png'))
+
+
+
+def save_best_robot(filename, robot_structure):
+
+    with open(filename, mode='w', encoding='utf-8') as f:
+        if isinstance(robot_structure, np.ndarray):
+            robot_structure = robot_structure.tolist()  # Convert to list if it's a NumPy array
+        json.dump(robot_structure, f, indent=4)
+    print(f"Best robot structure saved to {filename}")

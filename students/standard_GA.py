@@ -9,7 +9,7 @@ from fixed_controllers import *
 import csv
 import matplotlib.pyplot as plt
 import os
-from data_utils import create_directory, write_to_csv_file, plot_graph, average_csv_files
+from data_utils import create_directory, write_to_csv_file, plot_graph, average_csv_files, save_best_robot
 from GA_utils import evaluate_fitness, create_random_robot, standard_mutate, one_point_crossover, standard_tournament_selection, simulate_and_save
 
 class GeneticAlgorithm:
@@ -91,6 +91,10 @@ class GeneticAlgorithm:
         # Get the best robot
         best_robot = population[fitnesses.index(max(fitnesses))]
 
+        # Save the best robot structure to a file
+        best_robot_filename = self.directory + f'best_robot_run_{run_number}.json'
+        save_best_robot(best_robot_filename, best_robot)
+
         # Save information to CSV files
         write_to_csv_file(self.directory + f'best_fit_run_{run_number}.csv', best_fitness_history)
         #write_to_csv_file(self.directory + f'avg_fit_run_{run_number}.csv', average_fitness_history)
@@ -114,8 +118,8 @@ class GeneticAlgorithm:
             best_fitnesses.append(best_fitness)
 
             # Save the simulation and GIF for this run
-            gif_filename = self.directory + f'best_robot_run_{run}.gif'
-            simulate_and_save(scenario=self.scenario, steps=self.steps, controller=self.controller, best_robot=best_robot, filename=gif_filename)
+            #gif_filename = self.directory + f'best_robot_run_{run}.gif'
+            #simulate_and_save(scenario=self.scenario, steps=self.steps, controller=self.controller, best_robot=best_robot, filename=gif_filename)
 
            
         # Save the best fitnesses to a CSV file
@@ -140,5 +144,17 @@ if __name__ == "__main__":
                           scenario='Walker-v0',
                           controller=alternating_gait,
                           directory="results/genetic_algorithm/official_experiments/Walker-v0/walking/")
+                         
+    ga.execute_runs(n_runs=5)
+
+    ga = GeneticAlgorithm(num_generations=100, 
+                          population_size=50,
+                          tournament_size=5, 
+                          mutation_rate=0.5, 
+                          crossover_rate=0.8,
+                          elitism_count=2,
+                          scenario='BridgeWalker-v0',
+                          controller=alternating_gait,
+                          directory="results/genetic_algorithm/official_experiments/BridgeWalker-v0/walking/")
                          
     ga.execute_runs(n_runs=5)
