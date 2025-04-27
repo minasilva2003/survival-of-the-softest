@@ -141,8 +141,8 @@ if __name__ == "__main__":
                           mutation_rate=0.5, 
                           crossover_rate=0.8,
                           elitism_count=2,
-                          scenario='Walker-v0',
+                          scenario='BridgeWalker-v0',
                           controller=alternating_gait,
-                          directory="results/genetic_algorithm/official_experiments/Walker-v0/walking/")
+                          directory="results/genetic_algorithm/official_experiments/BridgeWalker-v0/walking/")
                          
     ga.execute_runs(n_runs=5)
