@@ -65,7 +65,8 @@ class GeneticAlgorithm:
             print(f"Generation {generation + 1}: Best Fitness = {best_fitness}")
 
             # Step 2: Replace worst individuals with immigrants
-            population, fitnesses = immigrant_function(population, fitnesses, self.immigrant_pool_size, self.scenario, self.controller, self.grid_size)
+            if (generation+1) % 10 == 0:
+                population, fitnesses = immigrant_function(population, fitnesses, self.immigrant_pool_size, self.scenario, self.controller, self.grid_size)
 
             # Step 3: Keep the elite
             elites = sorted(zip(population, fitnesses), key=lambda x: x[1], reverse=True)[:self.elitism_count]
@@ -165,7 +166,7 @@ if __name__ == "__main__":
                           immigrant_pool_size=5,
                           scenario='Walker-v0',
                           controller=alternating_gait,
-                          directory="results/hyper_genetic_algorithm/try_w_imm/Walker-v0/walking/")
+                          directory="results/hyper_genetic_algorithm/try_no_imm/Walker-v0/walking/")
                          
     ga.execute_runs(n_runs=5)
 

@@ -148,3 +148,26 @@ def immigrant_function(population, fitnesses, immigrant_pool_size, scenario, con
     updated_fitnesses = survivor_fitnesses + immigrant_fitnesses
 
     return updated_population, updated_fitnesses
+
+
+#function to do uniform_crossover
+def uniform_crossover(parent1, parent2):
+ 
+    # Ensure both parents have the same shape
+    assert parent1.shape == parent2.shape, "Parents must have the same shape for uniform crossover."
+
+    # Create empty children with the same shape as the parents
+    child1 = np.empty_like(parent1)
+    child2 = np.empty_like(parent2)
+
+    # Perform uniform crossover
+    for i in range(parent1.shape[0]):
+        for j in range(parent1.shape[1]):
+            if random.random() < 0.5:  # 50% chance to inherit from parent1
+                child1[i, j] = parent1[i, j]
+                child2[i, j] = parent2[i, j]
+            else:  # 50% chance to inherit from parent2
+                child1[i, j] = parent2[i, j]
+                child2[i, j] = parent1[i, j]
+
+    return child1, child2
