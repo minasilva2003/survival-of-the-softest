@@ -10,7 +10,7 @@ import csv
 import matplotlib.pyplot as plt
 import os
 from data_utils import create_directory, write_to_csv_file, plot_graph, average_csv_files, save_best_robot
-from GA_utils import evaluate_fitness, create_random_robot, immigrant_function, standard_mutate, one_point_crossover, standard_tournament_selection, simulate_and_save
+from GA_utils import evaluate_fitness, create_random_robot, immigrant_function, decaying_mutate, one_point_crossover, probabilistic_tournament_selection 
 
 class GeneticAlgorithm:
     def __init__(self, 
@@ -75,8 +75,8 @@ class GeneticAlgorithm:
             while len(offspring) < self.population_size:
 
                 # 4.1. tournament selection
-                parent1 = standard_tournament_selection(population, fitnesses, tournament_size=self.tournament_size)
-                parent2 = standard_tournament_selection(population, fitnesses, tournament_size=self.tournament_size)
+                parent1 = probabilistic_tournament_selection(population, fitnesses, tournament_size=self.tournament_size)
+                parent2 = probabilistic_tournament_selection(population, fitnesses, tournament_size=self.tournament_size)
 
                 # 4.2. crossover
                 if random.random() < self.crossover_rate:
@@ -86,9 +86,9 @@ class GeneticAlgorithm:
 
                 # 4.3. dynamic mutation
                 if random.random() < self.initial_mutation_rate:
-                    child1 = standard_mutate(child1, voxel_types=self.voxel_types)
+                    child1 = decaying_mutate(child1, base_mutation_rate=self.initial_mutation_rate, voxel_types=self.voxel_types)
                 if random.random() < self.initial_mutation_rate:
-                    child2 = standard_mutate(child2, voxel_types=self.voxel_types)
+                    child2 = decaying_mutate(child2, base_mutation_rate=self.initial_mutation_rate, voxel_types=self.voxel_types)
 
                 # 4.3.1. update mutation rate
                 self.initial_mutation_rate *= self.mutation_cooldown
@@ -157,8 +157,8 @@ if __name__ == "__main__":
     ga = GeneticAlgorithm(num_generations=100, 
                           population_size=50,
                           tournament_size=5, 
-                          initial_mutation_rate=0.7, 
-                          mutation_cooldown=0.99,
+                          initial_mutation_rate=0.5, 
+                          mutation_cooldown=1,
                           crossover_rate=0.8,
                           elitism_count=2,
                           immigrant_pool_size=5,
@@ -168,17 +168,5 @@ if __name__ == "__main__":
                          
     ga.execute_runs(n_runs=5)
 
-    ga = GeneticAlgorithm(num_generations=100, 
-                          population_size=50,
-                          tournament_size=5, 
-                          initial_mutation_rate=0.7, 
-                          mutation_cooldown=0.99,
-                          crossover_rate=0.8,
-                          elitism_count=2,
-                          immigrant_pool_size=5,
-                          scenario='BridgeWalker-v0',
-                          controller=alternating_gait,
-                          directory="results/hyper_genetic_algorithm/BridgeWalker-v0/walking/")
-                         
-    ga.execute_runs(n_runs=5)
+  
 

@@ -57,6 +57,28 @@ def standard_mutate(robot, voxel_types):
     offspring[x, y] = random.choice(voxel_types)
     return offspring
 
+#function to mutate random voxels up to a maximum number, with decaying probability
+def decaying_mutate(robot, voxel_types, base_mutation_rate, max_mutations=3):
+   
+    offspring = copy.deepcopy(robot)
+    num_mutations = 0
+
+    for attempt in range(max_mutations):
+        # Decay mutation probability exponentially with each attempt
+        prob = base_mutation_rate * np.exp(-attempt)
+
+        if random.random() < prob:
+            # Pick random position
+            x = random.randint(0, offspring.shape[0] - 1)
+            y = random.randint(0, offspring.shape[1] - 1)
+            
+            # Mutate voxel
+            offspring[x, y] = random.choice(voxel_types)
+            num_mutations += 1
+
+    return offspring
+
+
 #function to one point crossover between two parent robots
 def one_point_crossover(parent1, parent2):
     parent1_flat = parent1.flatten()
@@ -72,6 +94,29 @@ def one_point_crossover(parent1, parent2):
 def standard_tournament_selection(population, fitnesses, tournament_size):
     tournament = random.sample(list(zip(population, fitnesses)), tournament_size)
     return max(tournament, key=lambda x: x[1])[0]
+
+
+#function to choose probabilistic_tournament_selection
+def probabilistic_tournament_selection(population, fitnesses, tournament_size):
+
+    indices = random.sample(range(len(population)), tournament_size)
+    competitors = [population[i] for i in indices]
+    competitor_fitnesses = [fitnesses[i] for i in indices]
+
+    # Step 2: Rank competitors (highest fitness first)
+    ranked = sorted(zip(competitors, competitor_fitnesses), key=lambda x: x[1], reverse=True)
+    
+    # Step 3: Assign probabilities based on rank
+    # Example: Probability of selection = exp(rank) / sum(exp(rank))
+    ranks = np.arange(len(ranked))  # 0 = best, 1 = second best, etc.
+    probs = np.exp(-ranks)  # better ranks get higher probability
+    probs /= np.sum(probs)  # normalize
+
+    # Step 4: Select one based on computed probabilities
+    chosen_index = np.random.choice(len(ranked), p=probs)
+    selected_individual = ranked[chosen_index][0]
+
+    return selected_individual
 
 
 def simulate_and_save(best_robot, filename, scenario, steps, controller):
