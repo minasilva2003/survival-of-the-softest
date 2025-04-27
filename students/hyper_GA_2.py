@@ -10,7 +10,7 @@ import csv
 import matplotlib.pyplot as plt
 import os
 from data_utils import create_directory, write_to_csv_file, plot_graph, average_csv_files, save_best_robot
-from GA_utils import evaluate_fitness, create_random_robot, immigrant_function, decaying_mutate, one_point_crossover, probabilistic_tournament_selection, uniform_crossover
+from GA_utils import evaluate_fitness, create_random_robot, immigrant_function, decaying_mutate, one_point_crossover, standard_tournament_selection, uniform_crossover
 
 class GeneticAlgorithm:
     def __init__(self, 
@@ -76,8 +76,8 @@ class GeneticAlgorithm:
             while len(offspring) < self.population_size:
 
                 # 4.1. tournament selection
-                parent1 = probabilistic_tournament_selection(population, fitnesses, tournament_size=self.tournament_size)
-                parent2 = probabilistic_tournament_selection(population, fitnesses, tournament_size=self.tournament_size)
+                parent1 = standard_tournament_selection(population, fitnesses, tournament_size=self.tournament_size)
+                parent2 = standard_tournament_selection(population, fitnesses, tournament_size=self.tournament_size)
 
                 # 4.2. crossover
                 if random.random() < self.crossover_rate:
@@ -160,7 +160,7 @@ if __name__ == "__main__":
                           population_size=50,
                           tournament_size=5, 
                           initial_mutation_rate=0.5, 
-                          cooldown=0.99,
+                          cooldown=1,
                           crossover_rate=0.8,
                           elitism_count=2,
                           immigrant_pool_size=5,
