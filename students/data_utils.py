@@ -72,3 +72,15 @@ def save_best_robot(filename, robot_structure):
             robot_structure = robot_structure.tolist()  # Convert to list if it's a NumPy array
         json.dump(robot_structure, f, indent=4)
     print(f"Best robot structure saved to {filename}")
+
+
+
+def save_best_controller(weights, filename):
+
+    # Convert weights to a JSON-serializable format (lists)
+    weights_serializable = [w.tolist() for w in weights]
+
+    # Save to a JSON file
+    with open(filename, mode='w', encoding='utf-8') as f:
+        json.dump(weights_serializable, f, indent=4)
+    print(f"Best controller saved to {filename}")

@@ -9,15 +9,18 @@ import csv
 import matplotlib.pyplot as plt
 import torch
 
+from data_utils import save_best_controller
 
 class CMA_ES_Controller:
-    def __init__(self, population_size=50, num_generations=10, steps=500, sigma=0.5, scenario='DownStepper-v0', directory="results/cma-es/"):
+    def __init__(self, population_size=50, num_generations=10, steps=500, sigma=0.5, cooldown=0.995, topk=10,scenario='DownStepper-v0', directory="results/cma-es/"):
         self.num_generations = num_generations
         self.population_size = population_size
         self.steps = steps
         self.scenario = scenario
         self.directory = directory
         self.sigma = sigma
+        self.topk = topk
+        self.cooldown = cooldown
 
         # Robot structure
         self.robot_structure = np.array([
@@ -64,7 +67,7 @@ class CMA_ES_Controller:
         return t_reward
 
 
-    def cma_es_search(self, run_number, sigma=0.5):
+    def cma_es_search(self, run_number):
         """Perform CMA-ES (Covariance Matrix Adaptation Evolution Strategy) search."""
         best_weights = None
         best_fitness = -float('inf')
@@ -85,7 +88,7 @@ class CMA_ES_Controller:
             for it in range(self.num_generations):
                 # Sample population
                 noises = np.random.multivariate_normal(np.zeros(dim), cov, size=self.population_size)
-                population = mean_weights[None, :] + sigma * noises
+                population = mean_weights[None, :] + self.sigma * noises
 
                 fitnesses = []
                 for individual in population:
@@ -104,16 +107,15 @@ class CMA_ES_Controller:
                 fitnesses = np.array(fitnesses)
 
                 # Sort and select best individuals
-                topk = self.population_size // 2
-                idx_sorted = np.argsort(fitnesses)[-topk:]  # maximize fitness
+                idx_sorted = np.argsort(fitnesses)[-self.topk:]  # maximize fitness
                 top_noises = noises[idx_sorted]
 
                 # Update mean
                 mean_shift = np.mean(top_noises, axis=0)
-                mean_weights = mean_weights + sigma * mean_shift
+                mean_weights = mean_weights + self.sigma * mean_shift
 
                 # Update covariance
-                cov = (top_noises.T @ top_noises) / topk
+                cov = (top_noises.T @ top_noises) / self.topk
                 cov += 1e-5 * np.identity(dim)  # Add small noise for numerical stability
 
                 # Track best
@@ -133,6 +135,8 @@ class CMA_ES_Controller:
                 writer.writerow([it + 1, fitnesses[best_idx]])
                 fitness_history.append(fitnesses[best_idx])
 
+                self.sigma *= self.cooldown
+
                 print(f"Iteration {it + 1}: Best Fitness = {fitnesses[best_idx]}")
 
         # Plotting
@@ -148,6 +152,9 @@ class CMA_ES_Controller:
         plt.close()
         print(f"Fitness plot for run {run_number} saved to {graph_filename}")
 
+        print(type(best_weights))
+        print(type(best_weights[0]))
+        save_best_controller(best_weights, self.directory + f'controller_run_{run_number}.json')
         return best_weights, best_fitness
     
 
@@ -187,7 +194,20 @@ if __name__ == "__main__":
                                          num_generations=100,
                                          steps=500,
                                          sigma=0.5,
+                                         cooldown=0.995,
+                                         topk=10,
                                          scenario="DownStepper-v0",
-                                         directory="results/cma-es/")
+                                         directory="results/cma-es/DownStepper-v0/")
+    
+    cma_es_algorithm.execute_runs(5)
+
+    cma_es_algorithm = CMA_ES_Controller(population_size=50,
+                                         num_generations=100,
+                                         steps=500,
+                                         sigma=0.5,
+                                         cooldown=0.995,
+                                         topk=10,
+                                         scenario="ObstacleTraverser-v0",
+                                         directory="results/cma-es/ObstacleTraverser-v0/")
     
     cma_es_algorithm.execute_runs(5)
