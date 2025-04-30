@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import os
 from data_utils import create_directory, write_to_csv_file, plot_graph, average_csv_files, save_best_robot
 from GA_utils import evaluate_fitness, create_random_robot, immigrant_function, decaying_mutate, one_point_crossover, standard_tournament_selection, uniform_crossover
-
+import multiprocessing
 class GeneticAlgorithm:
     def __init__(self, 
                  population_size=10, 
@@ -46,6 +46,11 @@ class GeneticAlgorithm:
 
         create_directory(self.directory)  # Create directory for saving results
 
+    
+    def fitness_wrapper(self, args):
+        scenario, robot, controller = args
+        return evaluate_fitness(scenario=scenario, robot_structure=robot, controller=controller)
+
     # perform genetic algorithm to evolve the best robot structure
     def genetic_algorithm(self, run_number):
         best_robot = None
@@ -59,13 +64,18 @@ class GeneticAlgorithm:
         for generation in range(self.num_generations):
 
             # Step 1: Evaluate fitness
-            fitnesses = [evaluate_fitness(scenario = self.scenario, robot_structure=robot, controller=self.controller) for robot in population]
+            with multiprocessing.Pool() as pool:
+                fitnesses = pool.map(self.fitness_wrapper, [(self.scenario, robot, self.controller) for robot in population])
+
+            #fitnesses = [evaluate_fitness(scenario = self.scenario, robot_structure=robot, controller=self.controller) for robot in population]
+            
             best_fitness = max(fitnesses)
             best_fitness_history.append(best_fitness)
             print(f"Generation {generation + 1}: Best Fitness = {best_fitness}")
 
             # Step 2: Replace worst individuals with immigrants
-            population, fitnesses = immigrant_function(population, fitnesses, self.immigrant_pool_size, self.scenario, self.controller, self.grid_size)
+            if (generation+1) % 10 == 0:
+                population, fitnesses = immigrant_function(population, fitnesses, self.immigrant_pool_size, self.scenario, self.controller, self.grid_size)
 
             # Step 3: Keep the elite
             elites = sorted(zip(population, fitnesses), key=lambda x: x[1], reverse=True)[:self.elitism_count]
@@ -158,14 +168,14 @@ if __name__ == "__main__":
     ga = GeneticAlgorithm(num_generations=100, 
                           population_size=50,
                           tournament_size=5, 
-                          initial_mutation_rate=0.5, 
+                          initial_mutation_rate=0.1, 
                           cooldown=1,
                           crossover_rate=0.8,
                           elitism_count=2,
                           immigrant_pool_size=5,
-                          scenario='Walker-v0',
+                          scenario='BridgeWalker-v0',
                           controller=alternating_gait,
-                          directory="results/hyper_genetic_algorithm/try_w_imm/Walker-v0/walking/")
+                          directory="results/hyper_genetic_algorithm/BridgeWalker-v0/walking/")
                          
     ga.execute_runs(n_runs=5)
 

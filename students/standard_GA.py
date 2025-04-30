@@ -138,7 +138,7 @@ if __name__ == "__main__":
     ga = GeneticAlgorithm(num_generations=100, 
                           population_size=50,
                           tournament_size=5, 
-                          mutation_rate=0.5, 
+                          mutation_rate=0.1, 
                           crossover_rate=0.8,
                           elitism_count=2,
                           scenario='Walker-v0',
