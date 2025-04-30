@@ -226,15 +226,15 @@ class DE_Controller:
 
 
 if __name__ == "__main__":
-    de_algorithm = DE_Controller(population_size=5,
-                                  num_generations=2,
+    de_algorithm = DE_Controller(population_size=50,
+                                  num_generations=100,
                                   steps=500,
                                   mutation_factor=0.1,
                                   crossover_rate=0.8,
                                   scenario="DownStepper-v0",
                                   directory="results/de/DownStepper-v0/")
     
-    de_algorithm.execute_runs(2)
+    de_algorithm.execute_runs(5)
 
 
 if __name__ == "__main__":
