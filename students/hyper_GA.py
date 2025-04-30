@@ -168,11 +168,11 @@ if __name__ == "__main__":
     ga = GeneticAlgorithm(num_generations=100, 
                           population_size=50,
                           tournament_size=5, 
-                          initial_mutation_rate=0.1, 
+                          initial_mutation_rate=0.5, 
                           cooldown=1,
                           crossover_rate=0.8,
                           elitism_count=2,
-                          immigrant_pool_size=5,
+                          immigrant_pool_size=3,
                           scenario='BridgeWalker-v0',
                           controller=alternating_gait,
                           directory="results/hyper_genetic_algorithm/BridgeWalker-v0/walking/")

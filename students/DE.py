@@ -8,7 +8,7 @@ import os
 import csv
 import matplotlib.pyplot as plt
 import torch
-
+import multiprocessing
 from data_utils import save_best_controller
 
 
@@ -22,6 +22,7 @@ class DE_Controller:
         self.mutation_factor = mutation_factor
         self.crossover_rate = crossover_rate
         self.seed = seed
+        self.brain = None
 
         np.random.seed(self.seed)
         random.seed(self.seed)
@@ -42,6 +43,19 @@ class DE_Controller:
             print(f"Created directory: {self.directory}")
         else:
             print(f"Directory already exists: {self.directory}")
+
+
+    def reshape_individual(self, individual):
+        # Reshape flat weights into model format
+        shapes = [p.shape for p in self.brain.parameters()]
+        new_weights = []
+        idx = 0
+        for shape in shapes:
+            size = np.prod(shape)
+            new_weights.append(individual[idx:idx+size].reshape(shape))
+            idx += size
+
+        return new_weights
 
     def evaluate_fitness(self, weights, view=False):
         """Evaluate the fitness of a neural controller with given weights."""
@@ -86,14 +100,20 @@ class DE_Controller:
             # each individual is a randomized flattened vector of weights, 
             #from a uniform distribution between -1 and 1
             brain = NeuralController(self.input_size, self.output_size)
+            self.brain = brain
             mean_weights = np.concatenate([p.detach().numpy().flatten() for p in brain.parameters()])
             dim = mean_weights.shape[0]
             population = np.random.uniform(-1, 1, (self.population_size, dim))  # Random initialization
 
+            with multiprocessing.Pool() as pool:
+                    reshaped_inds = pool.map(self.reshape_individual, population)
+                    old_fitnesses = pool.map(self.evaluate_fitness, reshaped_inds)
+            
             # Generational Loop
             for it in range(self.num_generations):
                 new_population = []
                 fitnesses = []
+                trials = []
 
                 for i in range(self.population_size):
 
@@ -113,24 +133,23 @@ class DE_Controller:
                         if random.random() < self.crossover_rate:
                             trial[j] = mutant[j]
 
-                    ###### Step 4: Evaluate fitness
-                    #reshape individual and perform fitness evaluation
-                    shapes = [p.shape for p in brain.parameters()]
-                    new_weights = []
-                    idx = 0
-                    for shape in shapes:
-                        size = np.prod(shape)
-                        new_weights.append(trial[idx:idx+size].reshape(shape))
-                        idx += size
+                    trials.append(trial)
 
-                    trial_fitness = self.evaluate_fitness(new_weights)
-                    fitnesses.append(trial_fitness)
-
-                    ###### Step 5: Replace individual in population with the new individual, if the new one is better
-                    if trial_fitness > self.evaluate_fitness([population[i][idx:idx+size].reshape(shape) for shape in shapes]):
-                        new_population.append(trial)
+                ###### Step 4: Evaluate fitness
+                #reshape all trials and evaluate their fitnesses
+                with multiprocessing.Pool() as pool:
+                    reshaped_inds = pool.map(self.reshape_individual, trials)
+                    trial_fitnesses = pool.map(self.evaluate_fitness, reshaped_inds)
+            
+                
+                ###### Step 5: Replace individual in population with the trial, if the trial is better
+                for i in range (self.population_size):
+                    if trial_fitnesses[i] > old_fitnesses[i]:
+                        new_population.append(trials[i])
+                        fitnesses.append(trial_fitnesses[i])
                     else:
                         new_population.append(population[i])
+                        fitnesses.append(old_fitnesses[i])
 
                 population = np.array(new_population)
 
@@ -146,6 +165,9 @@ class DE_Controller:
                         new_weights.append(population[best_idx][idx_flat:idx_flat+size].reshape(shape))
                         idx_flat += size
                     best_weights = new_weights
+
+                ###### Step 7: Update old fitnesses
+                old_fitnesses = fitnesses
 
                 # Logging
                 writer.writerow([it + 1, fitnesses[best_idx]])
@@ -204,22 +226,22 @@ class DE_Controller:
 
 
 if __name__ == "__main__":
-    de_algorithm = DE_Controller(population_size=50,
-                                  num_generations=100,
+    de_algorithm = DE_Controller(population_size=5,
+                                  num_generations=2,
                                   steps=500,
-                                  mutation_factor=0.5,
+                                  mutation_factor=0.1,
                                   crossover_rate=0.8,
                                   scenario="DownStepper-v0",
                                   directory="results/de/DownStepper-v0/")
     
-    de_algorithm.execute_runs(5)
+    de_algorithm.execute_runs(2)
 
 
 if __name__ == "__main__":
     de_algorithm = DE_Controller(population_size=50,
                                   num_generations=100,
                                   steps=500,
-                                  mutation_factor=0.5,
+                                  mutation_factor=0.1,
                                   crossover_rate=0.8,
                                   scenario="ObstacleTraverser-v0",
                                   directory="results/de/ObstacleTraverser-v0/")
