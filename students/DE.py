@@ -234,16 +234,16 @@ if __name__ == "__main__":
                                   scenario="DownStepper-v0",
                                   directory="results/de/DownStepper-v0/")
     
-    de_algorithm.execute_runs(5)
+    #de_algorithm.execute_runs(5)
 
 
 if __name__ == "__main__":
     de_algorithm = DE_Controller(population_size=50,
                                   num_generations=100,
                                   steps=500,
-                                  mutation_factor=0.1,
+                                  mutation_factor=0.5,
                                   crossover_rate=0.8,
                                   scenario="ObstacleTraverser-v0",
-                                  directory="results/de/ObstacleTraverser-v0/")
+                                  directory="results_more/de/ObstacleTraverser-v0/")
     
     de_algorithm.execute_runs(5)
