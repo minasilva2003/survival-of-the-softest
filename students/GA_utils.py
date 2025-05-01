@@ -97,15 +97,31 @@ def standard_tournament_selection(population, fitnesses, tournament_size):
 
 
 #function to choose probabilistic_tournament_selection
-def probabilistic_tournament_selection(population, fitnesses, tournament_size):
+def probabilistic_tournament_selection(population, fitnesses, tournament_size, temperature):
 
     indices = random.sample(range(len(population)), tournament_size)
     competitors = [population[i] for i in indices]
     competitor_fitnesses = [fitnesses[i] for i in indices]
+    baseline = 0.3
 
     # Step 2: Rank competitors (highest fitness first)
-    ranked = sorted(zip(competitors, competitor_fitnesses), key=lambda x: x[1], reverse=True)
+    sorted_group = sorted(zip(competitors, competitor_fitnesses), key=lambda x: x[1], reverse=True)
     
+    sorted_competitors = [competitor[0] for competitor in sorted_group]
+
+    for competitor in sorted_competitors[:-1]:
+
+        #if temperature is high, probability is LOW
+        #when temperature is low, probability is HIGH
+        prob = baseline + (1-baseline) * (1-temperature)
+
+        if random.random() < prob:
+            return competitor
+    
+    return sorted_competitors[-1]
+    
+
+
     # Step 3: Assign probabilities based on rank
     # Example: Probability of selection = exp(rank) / sum(exp(rank))
     ranks = np.arange(len(ranked))  # 0 = best, 1 = second best, etc.
