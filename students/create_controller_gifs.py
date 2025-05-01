@@ -99,4 +99,4 @@ def process_weights_and_simulate(directory, robot_structure, connectivity, scena
             env.close()
 
 
-process_weights_and_simulate("students/results/cma-es/DownStepper-v0/", robot_structure, connectivity, "DownStepper-v0",500,"students/results/cma-es/DownStepper-v0/")
+process_weights_and_simulate("students/results/de/DownStepper-v0/", robot_structure, connectivity, "DownStepper-v0",500,"students/results/de/DownStepper-v0/")
