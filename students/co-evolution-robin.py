@@ -165,7 +165,7 @@ class CoEvolutionGA_CMAES:
         diff = self.check_if_valid_pair(robot)
 
         if diff != -1:
-            print("Size mistmatch")
+            #print("Size mistmatch")
             return diff
 
         input_size, output_size = self.get_input_and_output_size(robot)
@@ -196,7 +196,7 @@ class CoEvolutionGA_CMAES:
 
         viewer.close()
         env.close()
-        print(t_reward)
+        #print(t_reward)
         return t_reward
         
 
@@ -211,6 +211,7 @@ class CoEvolutionGA_CMAES:
         
         with multiprocessing.Pool() as pool:
             robot_fitnesses = pool.map(self.evaluate_fitness, pairings)
+            print(robot_fitnesses)
         
         #robot_fitnesses = [self.evaluate_fitness(pairing) for pairing in pairings]
         
@@ -387,7 +388,7 @@ class CoEvolutionGA_CMAES:
             old_controller_fitnesses = controller_fitnesses
 
             #In certain intervals, check all robots against all controllers
-            if gen+1 % 10 == 0:
+            if (gen+1) % 10 == 0:
                 all_pairings = [(robot, controller) for robot in self.robot_population for controller in self.controller_population]
                 with multiprocessing.Pool() as pool:
                     all_fitnesses = pool.map(self.evaluate_fitness, all_pairings)
