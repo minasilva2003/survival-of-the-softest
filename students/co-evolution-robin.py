@@ -41,18 +41,29 @@ class CoEvolutionGA_CMAES:
 
         create_directory(self.directory)
 
-        self.input_size, self.output_size = self.get_input_and_output_size(np.array([
-                                                                                    [1, 3, 1, 0, 0],
-                                                                                    [4, 1, 3, 2, 2],
-                                                                                    [3, 0, 0, 4, 4],
-                                                                                    [1, 0, 0, 3, 0],
-                                                                                    [0, 0, 0, 0, 0]
-                                                                                ]))   
-
         np.random.seed(self.seed)
         random.seed(self.seed)
 
+        self.input_size, self.output_size = self.get_input_and_output_size(np.array([
+                                                                                    [1, 3, 1, 0, 0],
+                                                                                    [4, 1, 3, 2, 2],
+                                                                                    [3, 4, 4, 4, 4],
+                                                                                    [3, 0, 0, 3, 2],
+                                                                                    [0, 0, 0, 0, 2]
+                                                                                ]))
 
+        self.brain = None
+
+
+    def check_if_valid_pair(self, robot):
+        input_size, output_size = self.get_input_and_output_size(robot)
+
+        if input_size == self.input_size and output_size == self.output_size:
+            return -1
+        
+        else:
+            return 1 / (abs(input_size - self.input_size) + abs(output_size - self.output_size))
+        
 
     #get input and output size for Neural Controller
     def get_input_and_output_size(self, robot):
@@ -77,6 +88,7 @@ class CoEvolutionGA_CMAES:
         return new_controller
 
     def initialize_populations(self):
+
         # Initialize controller population
         brain = NeuralController(self.input_size, self.output_size)
         self.brain = brain
@@ -146,20 +158,21 @@ class CoEvolutionGA_CMAES:
     ###### Evaluate fitness of a robot-controller pairing 
     def evaluate_fitness(self, pairing, view=False):
       
-        robot, weights = pairing
+        robot, controller = pairing
+
+        weights = self.reshape_controller(controller)
+
+        diff = self.check_if_valid_pair(robot)
+
+        if diff != -1:
+            return diff
 
         input_size, output_size = self.get_input_and_output_size(robot)
 
-        print(f"this is input shape: {input_size} and this is weights: {len(weights)}, {len(weights[0])}")
-        print(f"this is supposed input shape: {self.input_size}")
         #load weights into NN
         brain = NeuralController(input_size, output_size)
 
-        try:
-            set_weights(brain, weights)
-        except Exception as e:
-            print("Brain mismatch")
-            return 0 
+        set_weights(brain, weights)
 
         #perform simulation
         env = gym.make(self.scenario, max_episode_steps=self.steps, body=robot, connections=get_full_connectivity(robot))
@@ -183,32 +196,95 @@ class CoEvolutionGA_CMAES:
         viewer.close()
         env.close()
         return t_reward
+        
 
-    def evaluate_fitness_in_pairs(self):
+
+    def evaluate_fitness_in_pairs_random(self):
       
-        if self.pairing_strategy == "random":
+        
 
-            ###### Step 1: Evaluate each robot with random controller pairing
-            pairings = [(robot, self.reshape_controller(random.choice(self.controller_population))) for robot in self.robot_population]
+        ###### Step 1: Evaluate each robot with random controller pairing
+        pairings = [(robot, random.choice(self.controller_population)) for robot in self.robot_population]
 
-            """
+        
+        with multiprocessing.Pool() as pool:
+            robot_fitnesses = pool.map(self.evaluate_fitness, pairings)
+        
+        #robot_fitnesses = [self.evaluate_fitness(pairing) for pairing in pairings]
+        
+        #get best pairing
+        best_idx = np.argmax(robot_fitnesses)
+        best_pair_1 = pairings[best_idx]
+        best_fit_1 = robot_fitnesses[best_idx]
+
+        ###### Step 2: Evaluate each controller with random robot pairing
+        pairings = [(random.choice(self.robot_population), controller) for controller in self.controller_population]
+
+        
+        with multiprocessing.Pool() as pool:
+            controller_fitnesses = pool.map(self.evaluate_fitness, pairings)
+        
+        #controller_fitnesses = [self.evaluate_fitness(pairing) for pairing in pairings]
+        
+        #get best pairing
+        best_idx = np.argmax(controller_fitnesses)
+        best_pair_2 = pairings[best_idx]
+        best_fit_2 = controller_fitnesses[best_idx]
+
+        ###### Step 3: return fitnesses and best pairing
+        if best_fit_1 > best_fit_2:
+            return robot_fitnesses, controller_fitnesses, best_pair_1, best_fit_1
+        else:
+            return robot_fitnesses, controller_fitnesses, best_pair_2, best_fit_2
+        
+        
+    def evaluate_fitness_in_pairs_round_robin(self):
+            
+            pairings = []
+            
+            ###### Step 1: Robots
+
+            # assign 3 controllers to each robot
+            for robot in self.robot_population:
+                for _ in range (3):
+                    pairings.append((robot, random.choice(self.controller_population)))
+
+            # evaluate fitnesses
             with multiprocessing.Pool() as pool:
-                robot_fitnesses = pool.map(self.evaluate_fitness, pairings)
-            """
-            robot_fitnesses = [self.evaluate_fitness(pairing) for pairing in pairings]
+                aux_fitnesses = pool.map(self.evaluate_fitness, pairings)
+
+            robot_fitnesses = []
+
+            # average fitness for each three pairings
+            for idx in range(0, len(aux_fitnesses), 3):
+                robot_fitnesses.append((aux_fitnesses[idx] + aux_fitnesses[idx+1] + aux_fitnesses[idx+2]) / 3)
+
             #get best pairing
             best_idx = np.argmax(robot_fitnesses)
             best_pair_1 = pairings[best_idx]
             best_fit_1 = robot_fitnesses[best_idx]
 
-            ###### Step 2: Evaluate each controller with random robot pairing
-            pairings = [(random.choice(self.robot_population), self.reshape_controller(controller)) for controller in self.controller_population]
+            ####################################################################
 
-            """
+            ###### Step 2: Controllers
+
+            pairings = []
+
+            # assign 3 robots to each pairing
+            for controller in self.controller_population:
+                for _ in range (3):
+                    pairings.append((random.choice(self.robot_population), controller))
+
+            # evaluate fitnesses
             with multiprocessing.Pool() as pool:
-                controller_fitnesses = pool.map(self.evaluate_fitness, pairings)
-            """
-            controller_fitnesses = [self.evaluate_fitness(pairing) for pairing in pairings]
+                aux_fitnesses = pool.map(self.evaluate_fitness, pairings)
+
+            controller_fitnesses = []
+
+            # average fitness for each three pairings
+            for idx in range(0, len(aux_fitnesses), 3):
+                controller_fitnesses.append((aux_fitnesses[idx] + aux_fitnesses[idx+1] + aux_fitnesses[idx+2]) / 3)
+
             #get best pairing
             best_idx = np.argmax(controller_fitnesses)
             best_pair_2 = pairings[best_idx]
@@ -220,7 +296,62 @@ class CoEvolutionGA_CMAES:
             else:
                 return robot_fitnesses, controller_fitnesses, best_pair_2, best_fit_2
             
+
+    def evaluate_fitness_in_pairs_tournament(self, robot_fitnesses, controller_fitnesses, size=5):
+
+        pairings = []
         
+        ###### Step 1: Robots
+
+        # do a controller tournament for each robot
+        for robot in self.robot_population:
+            
+            tournament = random.sample(list(zip(self.controller_population, controller_fitnesses)), size)
+            winner = max(tournament, key=lambda x: x[1])[0]
+
+            pairings.append((robot, winner))
+    
+        
+        # evaluate fitnesses
+        with multiprocessing.Pool() as pool:
+            robot_fitnesses = pool.map(self.evaluate_fitness, pairings)
+
+        #get best pairing
+        best_idx = np.argmax(robot_fitnesses)
+        best_pair_1 = pairings[best_idx]
+        best_fit_1 = robot_fitnesses[best_idx]
+
+        ####################################################################
+
+        ###### Step 2: Controllers
+
+        pairings = []
+
+        # do a robot tournament for each controller
+        for controller in self.controller_population:
+            
+            tournament = random.sample(list(zip(self.robot_population, robot_fitnesses)), size)
+            winner = max(tournament, key=lambda x: x[1])[0]
+
+            pairings.append((winner, controller))
+    
+        # evaluate fitnesses
+        with multiprocessing.Pool() as pool:
+            controller_fitnesses = pool.map(self.evaluate_fitness, pairings)
+
+        #get best pairing
+        best_idx = np.argmax(controller_fitnesses)
+        best_pair_2 = pairings[best_idx]
+        best_fit_2 = controller_fitnesses[best_idx]
+
+        ###### Step 3: return fitnesses and best pairing
+        if best_fit_1 > best_fit_2:
+            return robot_fitnesses, controller_fitnesses, best_pair_1, best_fit_1
+        else:
+            return robot_fitnesses, controller_fitnesses, best_pair_2, best_fit_2
+        
+
+  
     
     def co_evolution(self, run_number):
 
@@ -234,24 +365,37 @@ class CoEvolutionGA_CMAES:
         self.initialize_populations()
         print("Population initialized")
 
+        old_robot_fitnesses = []
+        old_controller_fitnesses = []
+
         ###### Generational Loop
         for gen in range(self.num_generations):
             
             ###### Step 2: evaluate fitness in pairs
-            robot_fitnesses, controller_fitnesses, best_pair, best_fit = self.evaluate_fitness_in_pairs()
+            if self.pairing_strategy == "random":
+                robot_fitnesses, controller_fitnesses, best_pair, best_fit = self.evaluate_fitness_in_pairs_random()
+
+            elif self.pairing_strategy == "round_robin" or (self.pairing_strategy == "tournament" and gen == 0):
+                robot_fitnesses, controller_fitnesses, best_pair, best_fit = self.evaluate_fitness_in_pairs_round_robin()
+
+            elif self.pairing_strategy == "tournament":
+                robot_fitnesses, controller_fitnesses, best_pair, best_fit = self.evaluate_fitness_in_pairs_tournament(old_robot_fitnesses, old_controller_fitnesses)
+
+            old_robot_fitnesses = robot_fitnesses
+            old_controller_fitnesses = controller_fitnesses
 
             #In certain intervals, check all robots against all controllers
             if gen+1 % 10 == 0:
-                all_pairings = [(robot, self.reshape_controller(controller)) for robot in self.robot_population for controller in self.controller_population]
+                all_pairings = [(robot, controller) for robot in self.robot_population for controller in self.controller_population]
                 with multiprocessing.Pool() as pool:
                     all_fitnesses = pool.map(self.evaluate_fitness, all_pairings)
                 best_overall_idx = np.argmax(all_fitnesses)
                 best_overall_pair = all_pairings(best_overall_idx)
                 best_overall_fit = all_fitnesses(best_overall_idx)
 
-            #If the fitness found in all vs all comparisons is better than paired comparison, replace best pair and best fit
-            if best_overall_fit > best_fit:
-                best_fit, best_pair = best_overall_fit, best_overall_pair
+                #If the fitness found in all vs all comparisons is better than paired comparison, replace best pair and best fit
+                if best_overall_fit > best_fit:
+                    best_fit, best_pair = best_overall_fit, best_overall_pair
 
             #Log best fitness found in this generation
             best_fitness_history.append(best_fit)
@@ -281,10 +425,10 @@ class CoEvolutionGA_CMAES:
 
 
         ###### Step 9: Logging
-        write_to_csv_file(self.directory + f"best_fit_run_{run_number}.csv")
-        plot_graph(best_fitness_history, self.num_generations+1, 'Generation', 'Best_Fitness', 'Fitness', f"Best Fitness for Each Generation, Run {run_number}", self.directory + f'best_fit_plot_run_{run_number}.png')
+        write_to_csv_file(self.directory + f"best_fit_run_{run_number}.csv", best_fitness_history)
+        plot_graph(best_fitness_history, self.num_generations, 'Generation', 'Best_Fitness', 'Fitness', f"Best Fitness for Each Generation, Run {run_number}", self.directory + f'best_fit_plot_run_{run_number}.png')
         save_best_robot(self.directory + f"best_robot_run_{run_number}.json", best_robot)
-        save_best_controller(self.directory + f"best_controller_run_{run_number}.json", best_controller)
+        save_best_controller(best_controller, self.directory + f"best_controller_run_{run_number}.json")
         
         return best_robot, best_controller, best_fitness
 
@@ -325,11 +469,24 @@ if __name__ == "__main__":
     co_op = CoEvolutionGA_CMAES(ga_params = ga_params,
                                 cma_es_params = cma_es_params,
                                 steps = 500, 
-                                scenario = "Walker-v0", 
-                                population_size = 10,
-                                num_generations = 1,
-                                pairing_strategy = "random",
-                                directory = "results/co_evolution"
+                                scenario = "GapJumper-v0", 
+                                population_size = 50,
+                                num_generations = 100,
+                                pairing_strategy = "round_robin",
+                                directory = "results/co_evolution/robin/GapJumper-v0/"
                                 )
 
-    co_op.execute_runs(2)
+    co_op.execute_runs(5)
+
+    # Initialize and run co-evolution
+    co_op = CoEvolutionGA_CMAES(ga_params = ga_params,
+                                cma_es_params = cma_es_params,
+                                steps = 500, 
+                                scenario = "CaveCrawler-v0", 
+                                population_size = 50,
+                                num_generations = 100,
+                                pairing_strategy = "round_robin",
+                                directory = "results/co_evolution/robin/CaveCrawler-v0/"
+                                )
+
+    co_op.execute_runs(5)
