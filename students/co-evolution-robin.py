@@ -165,6 +165,7 @@ class CoEvolutionGA_CMAES:
         diff = self.check_if_valid_pair(robot)
 
         if diff != -1:
+            print("Size mistmatch")
             return diff
 
         input_size, output_size = self.get_input_and_output_size(robot)
@@ -195,6 +196,7 @@ class CoEvolutionGA_CMAES:
 
         viewer.close()
         env.close()
+        print(t_reward)
         return t_reward
         
 
