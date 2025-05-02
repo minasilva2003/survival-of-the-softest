@@ -59,10 +59,10 @@ class CoEvolutionGA_CMAES:
         input_size, output_size = self.get_input_and_output_size(robot)
 
         if input_size == self.input_size and output_size == self.output_size:
-            return -1
+            return 0
         
         else:
-            return 1 / (abs(input_size - self.input_size) + abs(output_size - self.output_size))
+            return -(abs(input_size - self.input_size) + abs(output_size - self.output_size))
         
 
     #get input and output size for Neural Controller
@@ -164,7 +164,8 @@ class CoEvolutionGA_CMAES:
 
         diff = self.check_if_valid_pair(robot)
 
-        if diff != -1:
+        if diff != 0:
+            #print("Size mistmatch")
             return diff
 
         input_size, output_size = self.get_input_and_output_size(robot)
@@ -195,6 +196,7 @@ class CoEvolutionGA_CMAES:
 
         viewer.close()
         env.close()
+        #print(t_reward)
         return t_reward
         
 
@@ -209,7 +211,7 @@ class CoEvolutionGA_CMAES:
         
         with multiprocessing.Pool() as pool:
             robot_fitnesses = pool.map(self.evaluate_fitness, pairings)
-        
+       
         #robot_fitnesses = [self.evaluate_fitness(pairing) for pairing in pairings]
         
         #get best pairing
@@ -258,6 +260,8 @@ class CoEvolutionGA_CMAES:
             # average fitness for each three pairings
             for idx in range(0, len(aux_fitnesses), 3):
                 robot_fitnesses.append((aux_fitnesses[idx] + aux_fitnesses[idx+1] + aux_fitnesses[idx+2]) / 3)
+
+            #print(robot_fitnesses)
 
             #get best pairing
             best_idx = np.argmax(robot_fitnesses)
@@ -385,13 +389,13 @@ class CoEvolutionGA_CMAES:
             old_controller_fitnesses = controller_fitnesses
 
             #In certain intervals, check all robots against all controllers
-            if gen+1 % 10 == 0:
+            if (gen+1) % 10 == 0:
                 all_pairings = [(robot, controller) for robot in self.robot_population for controller in self.controller_population]
                 with multiprocessing.Pool() as pool:
                     all_fitnesses = pool.map(self.evaluate_fitness, all_pairings)
                 best_overall_idx = np.argmax(all_fitnesses)
-                best_overall_pair = all_pairings(best_overall_idx)
-                best_overall_fit = all_fitnesses(best_overall_idx)
+                best_overall_pair = all_pairings[best_overall_idx]
+                best_overall_fit = all_fitnesses[best_overall_idx]
 
                 #If the fitness found in all vs all comparisons is better than paired comparison, replace best pair and best fit
                 if best_overall_fit > best_fit:
@@ -473,7 +477,7 @@ if __name__ == "__main__":
                                 population_size = 50,
                                 num_generations = 100,
                                 pairing_strategy = "tournament",
-                                directory = "results/co_evolution/tournament/GapJumper-v0/"
+                                directory = "results/co_evolution/robin/GapJumper-v0/"
                                 )
 
     co_op.execute_runs(5)
@@ -486,7 +490,7 @@ if __name__ == "__main__":
                                 population_size = 50,
                                 num_generations = 100,
                                 pairing_strategy = "tournament",
-                                directory = "results/co_evolution/tournament/CaveCrawler-v0/"
+                                directory = "results/co_evolution/robin/CaveCrawler-v0/"
                                 )
 
     co_op.execute_runs(5)
