@@ -164,7 +164,7 @@ class CoEvolutionGA_CMAES:
 
         diff = self.check_if_valid_pair(robot)
 
-        if diff != -0:
+        if diff != 0:
             #print("Size mistmatch")
             return diff
 
@@ -394,8 +394,8 @@ class CoEvolutionGA_CMAES:
                 with multiprocessing.Pool() as pool:
                     all_fitnesses = pool.map(self.evaluate_fitness, all_pairings)
                 best_overall_idx = np.argmax(all_fitnesses)
-                best_overall_pair = all_pairings(best_overall_idx)
-                best_overall_fit = all_fitnesses(best_overall_idx)
+                best_overall_pair = all_pairings[best_overall_idx]
+                best_overall_fit = all_fitnesses[best_overall_idx]
 
                 #If the fitness found in all vs all comparisons is better than paired comparison, replace best pair and best fit
                 if best_overall_fit > best_fit:
