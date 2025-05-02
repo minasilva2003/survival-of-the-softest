@@ -261,7 +261,7 @@ class CoEvolutionGA_CMAES:
             for idx in range(0, len(aux_fitnesses), 3):
                 robot_fitnesses.append((aux_fitnesses[idx] + aux_fitnesses[idx+1] + aux_fitnesses[idx+2]) / 3)
 
-            print(robot_fitnesses)
+            #print(robot_fitnesses)
 
             #get best pairing
             best_idx = np.argmax(robot_fitnesses)
