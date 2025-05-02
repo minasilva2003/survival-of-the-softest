@@ -211,8 +211,7 @@ class CoEvolutionGA_CMAES:
         
         with multiprocessing.Pool() as pool:
             robot_fitnesses = pool.map(self.evaluate_fitness, pairings)
-            print(robot_fitnesses)
-        
+       
         #robot_fitnesses = [self.evaluate_fitness(pairing) for pairing in pairings]
         
         #get best pairing
@@ -261,6 +260,8 @@ class CoEvolutionGA_CMAES:
             # average fitness for each three pairings
             for idx in range(0, len(aux_fitnesses), 3):
                 robot_fitnesses.append((aux_fitnesses[idx] + aux_fitnesses[idx+1] + aux_fitnesses[idx+2]) / 3)
+
+            print(robot_fitnesses)
 
             #get best pairing
             best_idx = np.argmax(robot_fitnesses)
