@@ -42,4 +42,4 @@ def process_robot_structures(directory, scenario, steps, controller):
 
 
 
-process_robot_structures("students/results/hyper_genetic_algorithm/Walker-v0/walking/", "Walker-v0", 500, alternating_gait)
+process_robot_structures("students/results_more/hyper_algorithm//BridgeWalker-v0/walking/", "BridgeWalker-v0", 500, alternating_gait)
