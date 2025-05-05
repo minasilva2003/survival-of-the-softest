@@ -477,10 +477,10 @@ if __name__ == "__main__":
                                 population_size = 50,
                                 num_generations = 100,
                                 pairing_strategy = "tournament",
-                                directory = "results/co_evolution/robin/GapJumper-v0/"
+                                directory = "results/co_evolution/tournament/GapJumper-v0/"
                                 )
 
-    co_op.execute_runs(5)
+    #co_op.execute_runs(5)
 
     # Initialize and run co-evolution
     co_op = CoEvolutionGA_CMAES(ga_params = ga_params,
@@ -490,7 +490,7 @@ if __name__ == "__main__":
                                 population_size = 50,
                                 num_generations = 100,
                                 pairing_strategy = "tournament",
-                                directory = "results/co_evolution/robin/CaveCrawler-v0/"
+                                directory = "results/co_evolution/tournament/CaveCrawler-v0-2/"
                                 )
 
     co_op.execute_runs(5)
