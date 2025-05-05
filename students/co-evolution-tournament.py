@@ -493,4 +493,4 @@ if __name__ == "__main__":
                                 directory = "results/co_evolution/tournament/CaveCrawler-v0/"
                                 )
 
-    co_op.execute_runs(3)
+    co_op.execute_runs(5)
