@@ -41,6 +41,8 @@ class CoEvolutionGA_CMAES:
 
         create_directory(self.directory)
 
+        self.evaluating_robot = False
+
         np.random.seed(self.seed)
         random.seed(self.seed)
 
@@ -166,7 +168,10 @@ class CoEvolutionGA_CMAES:
 
         if diff != 0:
             #print("Size mistmatch")
-            return diff
+            if self.evaluating_robot:
+                return diff
+            else:
+                return 0
 
         input_size, output_size = self.get_input_and_output_size(robot)
 
@@ -206,7 +211,8 @@ class CoEvolutionGA_CMAES:
         ###### Step 1: Evaluate each robot with random controller pairing
         pairings = [(robot, random.choice(self.controller_population)) for robot in self.robot_population]
 
-        
+        self.evaluating_robot = True
+
         with multiprocessing.Pool() as pool:
             robot_fitnesses = pool.map(self.evaluate_fitness, pairings)
        
@@ -220,6 +226,7 @@ class CoEvolutionGA_CMAES:
         ###### Step 2: Evaluate each controller with random robot pairing
         pairings = [(random.choice(self.robot_population), controller) for controller in self.controller_population]
 
+        self.evaluating_robot = False
         
         with multiprocessing.Pool() as pool:
             controller_fitnesses = pool.map(self.evaluate_fitness, pairings)
@@ -249,6 +256,9 @@ class CoEvolutionGA_CMAES:
                 for _ in range (3):
                     pairings.append((robot, random.choice(self.controller_population)))
 
+
+            self.evaluating_robot = True
+
             # evaluate fitnesses
             with multiprocessing.Pool() as pool:
                 aux_fitnesses = pool.map(self.evaluate_fitness, pairings)
@@ -277,6 +287,8 @@ class CoEvolutionGA_CMAES:
                 for _ in range (3):
                     pairings.append((random.choice(self.robot_population), controller))
 
+            self.evaluating_robot = False
+            
             # evaluate fitnesses
             with multiprocessing.Pool() as pool:
                 aux_fitnesses = pool.map(self.evaluate_fitness, pairings)
