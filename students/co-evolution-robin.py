@@ -489,7 +489,7 @@ if __name__ == "__main__":
                                 steps = 500, 
                                 scenario = "CaveCrawler-v0", 
                                 population_size = 50,
-                                num_generations = 100,
+                                num_generations = 33,
                                 pairing_strategy = "round_robin",
                                 directory = "results/co_evolution/robin2/CaveCrawler-v0/"
                                 )
