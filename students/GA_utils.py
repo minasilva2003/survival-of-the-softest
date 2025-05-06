@@ -187,3 +187,20 @@ def uniform_crossover(parent1, parent2):
                 child2[i, j] = parent1[i, j]
 
     return child1, child2
+
+def smart_row_crossover(parent1, parent2, num_rows_to_swap=None):
+    if parent1.shape != (5, 5) or parent2.shape != (5, 5):
+        raise ValueError("Both parents must be 5x5 matrices.")
+
+    if num_rows_to_swap is None:
+        num_rows_to_swap = random.randint(1, 4)  # avoid swapping all rows
+
+    rows = random.sample(range(5), num_rows_to_swap)
+
+    child1 = parent1.copy()
+    child2 = parent2.copy()
+
+    for row in rows:
+        child1[row], child2[row] = parent2[row].copy(), parent1[row].copy()
+
+    return child1, child2

@@ -10,12 +10,12 @@ import csv
 import matplotlib.pyplot as plt
 import os
 from data_utils import create_directory, write_to_csv_file, plot_graph, average_csv_files, save_best_robot
-from GA_utils import evaluate_fitness, create_random_robot, standard_mutate, one_point_crossover, probabilistic_tournament_selection
+from GA_utils import evaluate_fitness, create_random_robot, standard_mutate, one_point_crossover, standard_tournament_selection, smart_row_crossover
 import multiprocessing
 
 class GeneticAlgorithm:
     def __init__(self, population_size=10, num_generations=10, tournament_size=5, mutation_rate=0.5, crossover_rate=0.7,
-                 elitism_count=0, cooldown = 0.99, temperature=1, steps=500, grid_size=(5, 5), voxel_types=[0, 1, 2, 3, 4], controller=hopping_motion,
+                 elitism_count=0, steps=500, grid_size=(5, 5), voxel_types=[0, 1, 2, 3, 4], controller=hopping_motion,
                  scenario='Walker-v0', directory="results/genetic_algorithm/"):
         self.population_size = population_size
         self.num_generations = num_generations
@@ -23,8 +23,6 @@ class GeneticAlgorithm:
         self.mutation_rate = mutation_rate
         self.crossover_rate = crossover_rate
         self.elitism_count = elitism_count
-        self.cooldown = cooldown
-        self.temperature = temperature
         self.steps = steps
         self.grid_size = grid_size
         self.voxel_types = voxel_types  # Empty, Rigid, Soft, Active (+/-)
@@ -67,14 +65,14 @@ class GeneticAlgorithm:
             while len(offspring) < self.population_size:
 
                 # 3.1. tournament selection
-                parent1 = probabilistic_tournament_selection(population, fitnesses, self.tournament_size, self.temperature)
-                parent2 = probabilistic_tournament_selection(population, fitnesses, self.tournament_size, self.temperature)
+                parent1 = standard_tournament_selection(population, fitnesses, self.tournament_size, self.temperature)
+                parent2 = standard_tournament_selection(population, fitnesses, self.tournament_size, self.temperature)
 
                 # 3.2. crossover
                 if random.random() < self.crossover_rate:
                     connected=False
                     while not connected:
-                        child1, child2 = one_point_crossover(parent1, parent2)
+                        child1, child2 = smart_row_crossover(parent1, parent2)
                         connected = is_connected(child1) and is_connected(child2)
                 else:   
                     child1, child2 = copy.deepcopy(parent1), copy.deepcopy(parent2)
@@ -100,10 +98,7 @@ class GeneticAlgorithm:
             # Step 4: Create new population
             population = offspring[:self.population_size]  # Ensure population size is maintained
 
-            # Step 5: Cooldown
-            self.temperature *= self.cooldown
-            self.mutation_rate *= self.cooldown
-           
+             
         #get fitnesses of the final population
         fitnesses = [evaluate_fitness(scenario=self.scenario, controller=self.controller, robot_structure=robot) for robot in population]
         best_fitness = max(fitnesses)
@@ -159,13 +154,11 @@ if __name__ == "__main__":
     ga = GeneticAlgorithm(num_generations=100, 
                           population_size=50,
                           tournament_size=5, 
-                          mutation_rate=0.5, 
+                          mutation_rate=0.1, 
                           crossover_rate=0.8,
                           elitism_count=2,
-                          temperature=1,
-                          cooldown=0.99,
                           scenario='Walker-v0',
                           controller=alternating_gait,
-                          directory="results_more/hyper_algorithm/Walker-v0/walking/")
+                          directory="results/smart_crossover/Walker-v0/")
                          
     ga.execute_runs(n_runs=5)
