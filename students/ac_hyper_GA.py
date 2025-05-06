@@ -65,8 +65,8 @@ class GeneticAlgorithm:
             while len(offspring) < self.population_size:
 
                 # 3.1. tournament selection
-                parent1 = standard_tournament_selection(population, fitnesses, self.tournament_size, self.temperature)
-                parent2 = standard_tournament_selection(population, fitnesses, self.tournament_size, self.temperature)
+                parent1 = standard_tournament_selection(population, fitnesses, self.tournament_size)
+                parent2 = standard_tournament_selection(population, fitnesses, self.tournament_size)
 
                 # 3.2. crossover
                 if random.random() < self.crossover_rate:
