@@ -49,7 +49,7 @@ class CoEvolutionGA_CMAES:
                                                                                     [4, 1, 3, 2, 2],
                                                                                     [3, 4, 4, 4, 4],
                                                                                     [3, 0, 0, 3, 2],
-                                                                                    [0, 0, 0, 0, 2]
+                                                                                    [0, 0, 0, 0, 0]
                                                                                 ]))
 
         self.brain = None
@@ -477,7 +477,7 @@ if __name__ == "__main__":
                                 population_size = 50,
                                 num_generations = 100,
                                 pairing_strategy = "round_robin",
-                                directory = "results/co_evolution/robin/GapJumper-v0/"
+                                directory = "results/co_evolution/robin2/GapJumper-v0/"
                                 )
 
     co_op.execute_runs(5)
@@ -490,7 +490,7 @@ if __name__ == "__main__":
                                 population_size = 50,
                                 num_generations = 100,
                                 pairing_strategy = "round_robin",
-                                directory = "results/co_evolution/robin/CaveCrawler-v0/"
+                                directory = "results/co_evolution/robin2/CaveCrawler-v0/"
                                 )
 
     co_op.execute_runs(5)

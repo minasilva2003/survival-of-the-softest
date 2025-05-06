@@ -49,7 +49,7 @@ class CoEvolutionGA_CMAES:
                                                                                     [4, 1, 3, 2, 2],
                                                                                     [3, 4, 4, 4, 4],
                                                                                     [3, 0, 0, 3, 2],
-                                                                                    [0, 0, 0, 0, 2]
+                                                                                    [0, 0, 0, 0, 0]
                                                                                 ]))
 
         self.brain = None
@@ -203,8 +203,6 @@ class CoEvolutionGA_CMAES:
 
     def evaluate_fitness_in_pairs_random(self):
       
-        
-
         ###### Step 1: Evaluate each robot with random controller pairing
         pairings = [(robot, random.choice(self.controller_population)) for robot in self.robot_population]
 
@@ -476,8 +474,8 @@ if __name__ == "__main__":
                                 scenario = "GapJumper-v0", 
                                 population_size = 50,
                                 num_generations = 100,
-                                pairing_strategy = "tournament",
-                                directory = "results/co_evolution/tournament/GapJumper-v0/"
+                                pairing_strategy = "random",
+                                directory = "results/co_evolution/random/GapJumper-v0/"
                                 )
 
     #co_op.execute_runs(5)
@@ -489,8 +487,8 @@ if __name__ == "__main__":
                                 scenario = "CaveCrawler-v0", 
                                 population_size = 50,
                                 num_generations = 100,
-                                pairing_strategy = "tournament",
-                                directory = "results/co_evolution/tournament/CaveCrawler-v0/"
+                                pairing_strategy = "random",
+                                directory = "results/co_evolution/random/CaveCrawler-v0/"
                                 )
 
     co_op.execute_runs(5)
