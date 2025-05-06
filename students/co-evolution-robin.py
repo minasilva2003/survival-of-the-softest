@@ -264,10 +264,10 @@ class CoEvolutionGA_CMAES:
             #print(robot_fitnesses)
 
             #get best pairing
-            best_idx = np.argmax(robot_fitnesses)
+            best_idx = np.argmax(aux_fitnesses)
             best_pair_1 = pairings[best_idx]
-            best_fit_1 = robot_fitnesses[best_idx]
-
+            best_fit_1 = aux_fitnesses[best_idx]
+           
             ####################################################################
 
             ###### Step 2: Controllers
@@ -290,9 +290,10 @@ class CoEvolutionGA_CMAES:
                 controller_fitnesses.append((aux_fitnesses[idx] + aux_fitnesses[idx+1] + aux_fitnesses[idx+2]) / 3)
 
             #get best pairing
-            best_idx = np.argmax(controller_fitnesses)
+            best_idx = np.argmax(aux_fitnesses)
             best_pair_2 = pairings[best_idx]
-            best_fit_2 = controller_fitnesses[best_idx]
+            best_fit_2 = aux_fitnesses[best_idx]
+           
 
             ###### Step 3: return fitnesses and best pairing
             if best_fit_1 > best_fit_2:
