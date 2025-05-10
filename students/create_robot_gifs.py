@@ -93,4 +93,4 @@ def process_robot_structures(directory, scenario, steps, duration=0.066):
 
 
 
-process_robot_structures("results/co_evolution/tournament/CaveCrawler-v0/", "CaveCrawler-v0", 500)
+process_robot_structures("results/co_evolution/robin2/G-v0/", "CaveCrawler-v0", 500)

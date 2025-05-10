@@ -85,12 +85,12 @@ def plot_average_fitness_evolution(directory1, directory2, final_directory, algo
     plt.close()
     print(f"Plot saved to {output_path}")
 
-plot_average_fitness_evolution("results/co_evolution/robin/CaveCrawler-v0/",
-                               "results/co_evolution/tournament/CaveCrawler-v0/",
+plot_average_fitness_evolution("results/co_evolution/robin2/CaveCrawler-v0/",
+                               "results/co_evolution/random/CaveCrawler-v0/",
                                "results/co_evolution/",
                                "robin",
-                               "tournament",
+                               "random",
                                5,
-                               2.86138843004549,
+                               4.498773276526776,
                                "coevolution_cave_crawler")
 
