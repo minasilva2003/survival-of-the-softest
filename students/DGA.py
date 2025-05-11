@@ -23,8 +23,8 @@ class GeneticAlgorithm:
         self.mutation_rate = mutation_rate
         self.crossover_rate = crossover_rate
         self.elitism_count = elitism_count
-        self.temperature = temperature,
-        self.cooldown = cooldown,
+        self.temperature = temperature
+        self.cooldown = cooldown
         self.steps = steps
         self.grid_size = grid_size
         self.voxel_types = voxel_types  # Empty, Rigid, Soft, Active (+/-)
@@ -155,7 +155,7 @@ if __name__ == "__main__":
                           crossover_rate=0.8,
                           elitism_count=2,
                           cooldown=0.995,
-                          temperature=1,
+                          temperature=1.0,
                           scenario='Walker-v0',
                           controller=alternating_gait,
                           directory="results/DGA/Walker-v0/")
@@ -169,7 +169,7 @@ if __name__ == "__main__":
                           crossover_rate=0.8,
                           elitism_count=2,
                           cooldown=0.995,
-                          temperature=1,
+                          temperature=1.0,
                           scenario='BridgeWalker-v0',
                           controller=alternating_gait,
                           directory="results/DGA/BridgeWalker-v0/")
