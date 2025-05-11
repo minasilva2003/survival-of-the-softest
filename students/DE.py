@@ -3,13 +3,13 @@ import random
 import gymnasium as gym
 from evogym.envs import *
 from evogym import EvoViewer, get_full_connectivity
-from neural_controller import *
+from utils.neural_controller import *
 import os
 import csv
 import matplotlib.pyplot as plt
 import torch
 import multiprocessing
-from data_utils import save_best_controller
+from utils.data_utils import save_best_controller
 
 
 class DE_Controller:
@@ -232,9 +232,9 @@ if __name__ == "__main__":
                                   mutation_factor=0.1,
                                   crossover_rate=0.8,
                                   scenario="DownStepper-v0",
-                                  directory="results/de/DownStepper-v0/")
+                                  directory="results/DownStepper-v0/")
     
-    #de_algorithm.execute_runs(5)
+    de_algorithm.execute_runs(5)
 
 
 if __name__ == "__main__":
@@ -244,6 +244,6 @@ if __name__ == "__main__":
                                   mutation_factor=0.5,
                                   crossover_rate=0.8,
                                   scenario="ObstacleTraverser-v0",
-                                  directory="results_more/de/ObstacleTraverser-v0/")
+                                  directory="results_more/ObstacleTraverser-v0/")
     
     de_algorithm.execute_runs(5)
