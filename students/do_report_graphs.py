@@ -64,12 +64,13 @@ def plot_average_fitness_evolution(directory1, directory2, final_directory, algo
     std_fitness2 = np.std(all_fitnesses2, axis=0)
 
     # Plot the results
-    generations = np.arange(1, len(avg_fitness1) + 1)
+    generations1 = np.arange(1, len(avg_fitness1) + 1)
+    generations2 = np.arange(1, len(avg_fitness2) + 1)
     plt.figure(figsize=(10, 6))
-    plt.plot(generations, avg_fitness1, label=f"Average Best Fitness {algorithm1}", color="blue")
-    plt.fill_between(generations, avg_fitness1 - std_fitness1, avg_fitness1 + std_fitness1, color="blue", alpha=0.2, label=f"± Std {algorithm1}")
-    plt.plot(generations, avg_fitness2, label=f"Average Best Fitness {algorithm2}", color="green")
-    plt.fill_between(generations, avg_fitness2 - std_fitness2, avg_fitness2 + std_fitness2, color="green", alpha=0.2, label=f"± Std {algorithm2}")
+    plt.plot(generations1, avg_fitness1, label=f"Average Best Fitness {algorithm1}", color="blue")
+    plt.fill_between(generations1, avg_fitness1 - std_fitness1, avg_fitness1 + std_fitness1, color="blue", alpha=0.2, label=f"± Std {algorithm1}")
+    plt.plot(generations2, avg_fitness2, label=f"Average Best Fitness {algorithm2}", color="green")
+    plt.fill_between(generations2, avg_fitness2 - std_fitness2, avg_fitness2 + std_fitness2, color="green", alpha=0.2, label=f"± Std {algorithm2}")
     plt.axhline(y=threshold, color="red", linestyle="--", label=f"Threshold = {threshold}")
 
     # Add labels, legend, and grid
@@ -85,12 +86,12 @@ def plot_average_fitness_evolution(directory1, directory2, final_directory, algo
     plt.close()
     print(f"Plot saved to {output_path}")
 
-plot_average_fitness_evolution("results/co_evolution/robin2/CaveCrawler-v0/",
-                               "results/co_evolution/random/CaveCrawler-v0/",
+plot_average_fitness_evolution("results/co_evolution/robin2/GapJumper-v0/",
+                               "results/co_evolution/random/GapJumper-v0/",
                                "results/co_evolution/",
                                "robin",
                                "random",
                                5,
-                               4.498773276526776,
-                               "coevolution_cave_crawler")
+                               3.403370879265009,
+                               "coevolution_gap_jumper")
 

@@ -28,4 +28,4 @@ def compute_fitness_stats(filepath):
     print(f"Average Fitness: {avg_fitness:.4f}")
     print(f"Standard Deviation: {std_fitness:.4f}")
 
-compute_fitness_stats("students/results_more/genetic_algorithm/always_connected/BridgeWalker-v0/walking/all_runs_best_fit.csv")
+compute_fitness_stats("students/results/co_evolution/random/CaveCrawler-v0/all_runs_best_fit.csv")
